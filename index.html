@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WOD Tracker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 15px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      background: white;
+      color: #667eea;
+    }
+
+    .tab:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .tab.active:hover {
+      background: white;
+    }
+
+    .content {
+      display: none;
+    }
+
+    .content.active {
+      display: block;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .stat-card-gradient {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 3em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .stat-subtext {
+      font-size: 0.85em;
+      opacity: 0.8;
+    }
+
+    .chart-container {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .chart-title {
+      font-size: 1.3em;
+      color: #667eea;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bar-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .bar-label {
+      width: 100px;
+      font-size: 0.95em;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .bar-container {
+      flex: 1;
+      height: 28px;
+      background: #f0f0f0;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      border-radius: 14px;
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      color: white;
+      font-size: 0.9em;
+      font-weight: bold;
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+    }
+
+    .workout-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .btn-adhoc {
+      background: #48bb78;
+      color: white;
+      padding: 15px 30px;
+      font-size: 18px;
+    }
+
+    .btn-adhoc:hover {
+      background: #38a169;
+    }
+
+    .workout-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+
+    .workout-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    .workout-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .workout-title {
+      font-size: 1.5em;
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    .workout-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .meta-item {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .meta-label {
+      font-size: 0.8em;
+      color: #666;
+      margin-bottom: 3px;
+    }
+
+    .meta-value {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .workout-description {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      white-space: pre-wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background: #48bb78;
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-checkbox input {
+      width: 20px;
+      height: 20px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 1.5em;
+      color: #667eea;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .history-item {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-left: 4px solid #667eea;
+    }
+
+    .history-date {
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .loading {
+      text-align: center;
+      color: white;
+      font-size: 1.2em;
+      padding: 40px;
+    }
+
+    .error {
+      background: #fed7d7;
+      color: #c53030;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💪 WOD Tracker</h1>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('today')">Today's WOD</button>
+      <button class="tab" onclick="showTab('analytics')">Analytics</button>
+      <button class="tab" onclick="showTab('history')">History</button>
+    </div>
+
+    <div id="today-content" class="content active">
+      <div class="action-buttons">
+        <button class="btn btn-adhoc" onclick="openAdHocModal()">➕ Log Ad Hoc Workout</button>
+      </div>
+      <div id="today-loading" class="loading">Loading workouts...</div>
+      <div id="today-error" class="error" style="display:none;"></div>
+      <div id="today-workout" class="workout-grid"></div>
+    </div>
+
+    <div id="analytics-content" class="content">
+      <!-- Key Stats Grid -->
+      <div class="analytics-grid">
+        <div class="stat-card stat-card-gradient">
+          <div class="stat-label">Total Workouts</div>
+          <div class="stat-value" id="total-workouts">0</div>
+          <div class="stat-subtext">All time</div>
+        </div>
+
+        <div class="stat-card stat-card-gradient">
+          <div class="stat-label">This Week</div>
+          <div class="stat-value" id="week-workouts">0</div>
+          <div class="stat-subtext" id="week-change">--</div>
+        </div>
+
+        <div class="stat-card stat-card-gradient">
+          <div class="stat-label">Current Streak</div>
+          <div class="stat-value" id="current-streak">0</div>
+          <div class="stat-subtext">days</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-container">
+          <div class="chart-title">Workout Types</div>
+          <div class="bar-chart" id="type-chart"></div>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-title">Recovery Frequency</div>
+          <div class="bar-chart" id="recovery-chart"></div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <div class="chart-title">Weekly Volume (Last 4 Weeks)</div>
+        <div class="bar-chart" id="weekly-chart"></div>
+      </div>
+    </div>
+
+    <div id="history-content" class="content">
+      <div id="history-loading" class="loading">Loading history...</div>
+      <div id="history-error" class="error" style="display:none;"></div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- Log Workout Modal -->
+  <div id="log-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Log Workout</h2>
+        <button class="close-btn" onclick="closeLogModal()">&times;</button>
+      </div>
+      <form id="log-form">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" id="log-date" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">What You Did</label>
+          <textarea id="log-notes" class="form-textarea" placeholder="Describe your workout..." required></textarea>
+        </div>
+
+        <div class="form-group" id="cardio-type-group" style="display:none;">
+          <label class="form-label">Cardio Type</label>
+          <select id="log-cardio-type" class="form-select">
+            <option value="">Select...</option>
+            <option value="Wheels">Wheels (Bike/Row)</option>
+            <option value="Feet">Feet (Run)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <div class="form-checkbox">
+            <input type="checkbox" id="log-redlight">
+            <label>Red Light Therapy</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Hot Tub / Sauna</label>
+          <select id="log-hottub" class="form-select">
+            <option value="No">No</option>
+            <option value="Hot Tub">Hot Tub</option>
+            <option value="Sauna">Sauna</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <div class="form-checkbox">
+            <input type="checkbox" id="log-coldplunge">
+            <label>Cold Plunge</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success" style="width:100%;">Save Workout</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Ad Hoc Workout Modal -->
+  <div id="adhoc-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Log Ad Hoc Workout</h2>
+        <button class="close-btn" onclick="closeAdHocModal()">&times;</button>
+      </div>
+      <form id="adhoc-form">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" id="adhoc-date" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Workout Type</label>
+          <select id="adhoc-type" class="form-select" required>
+            <option value="">Select type...</option>
+            <option value="Strength">Strength</option>
+            <option value="Cardio">Cardio</option>
+            <option value="Mixed">Mixed</option>
+            <option value="Recovery">Recovery</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">WOD Name</label>
+          <input type="text" id="adhoc-wod" class="form-input" placeholder="e.g., Morning Run, Heavy Squats" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Cycle Focus (Optional)</label>
+          <input type="text" id="adhoc-focus" class="form-input" placeholder="e.g., Endurance, Power">
+        </div>
+
+        <div class="form-group" id="adhoc-cardio-type-group" style="display:none;">
+          <label class="form-label">Cardio Type</label>
+          <select id="adhoc-cardio-type" class="form-select">
+            <option value="">Select...</option>
+            <option value="Wheels">Wheels (Bike/Row)</option>
+            <option value="Feet">Feet (Run)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">What You Did</label>
+          <textarea id="adhoc-notes" class="form-textarea" placeholder="Describe your workout..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <div class="form-checkbox">
+            <input type="checkbox" id="adhoc-redlight">
+            <label>Red Light Therapy</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Hot Tub / Sauna</label>
+          <select id="adhoc-hottub" class="form-select">
+            <option value="No">No</option>
+            <option value="Hot Tub">Hot Tub</option>
+            <option value="Sauna">Sauna</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <div class="form-checkbox">
+            <input type="checkbox" id="adhoc-coldplunge">
+            <label>Cold Plunge</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success" style="width:100%;">Save Ad Hoc Workout</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== CONFIG =====
+    const API_URL = 'https://script.google.com/macros/s/AKfycbykDpIfvxzLlThsWllXTkq8-EqQgWA5Q8io50jLr0ve0zFyOTohjxCxnDrKALLikFNBlw/exec';
+
+    let workouts = [];
+    let currentWorkoutIndex = 0;
+    let currentWorkout = null;
+    let historyData = [];
+
+    // ===== INITIALIZATION =====
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set today's date as default
+      document.getElementById('log-date').valueAsDate = new Date();
+      
+      // Load data
+      loadWorkouts();
+      loadAnalytics();
+    });
+
+    // ===== TAB NAVIGATION =====
+    function showTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Update content
+      document.querySelectorAll('.content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      if (tabName === 'today') {
+        document.getElementById('today-content').classList.add('active');
+      } else if (tabName === 'analytics') {
+        document.getElementById('analytics-content').classList.add('active');
+        loadAnalytics();
+      } else if (tabName === 'history') {
+        document.getElementById('history-content').classList.add('active');
+        loadHistory();
+      }
+    }
+
+    // ===== LOAD WORKOUTS =====
+    async function loadWorkouts() {
+      try {
+        const response = await fetch(`${API_URL}?action=getWorkouts`);
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to load workouts');
+        }
+
+        workouts = data.workouts || [];
+        
+        // Find the first incomplete workout
+        currentWorkoutIndex = workouts.findIndex(w => !w.isDone);
+        if (currentWorkoutIndex === -1) currentWorkoutIndex = 0;
+
+        displayTodayWorkout();
+      } catch (error) {
+        document.getElementById('today-loading').style.display = 'none';
+        document.getElementById('today-error').textContent = error.message;
+        document.getElementById('today-error').style.display = 'block';
+      }
+    }
+
+    // ===== DISPLAY TODAY'S WORKOUT =====
+    function displayTodayWorkout() {
+      document.getElementById('today-loading').style.display = 'none';
+
+      if (workouts.length === 0) {
+        document.getElementById('today-workout').innerHTML = `
+          <div class="empty-state">
+            <p>No workouts available. Add workouts to your spreadsheet!</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Find the first incomplete workout
+      const firstIncompleteIndex = workouts.findIndex(w => !w.isDone);
+      const startIndex = firstIncompleteIndex !== -1 ? firstIncompleteIndex : 0;
+      
+      // Show 6 upcoming workouts (or fewer if not available)
+      const workoutsToShow = workouts.slice(startIndex, startIndex + 6);
+
+      const workoutCards = workoutsToShow.map((workout, index) => {
+        const cardioTypeInfo = workout.type === 'Cardio' ? 
+          `<div class="meta-item">
+            <div class="meta-label">Cardio Focus</div>
+            <div class="meta-value">Choose Wheels or Feet</div>
+          </div>` : '';
+
+        return `
+          <div class="workout-card">
+            <div class="workout-header">
+              <div class="workout-title">${workout.wod || 'Workout'}</div>
+              <button class="btn btn-primary" onclick="openLogModalForWorkout(${startIndex + index})">Log It!</button>
+            </div>
+
+            <div class="workout-meta">
+              <div class="meta-item">
+                <div class="meta-label">Cycle</div>
+                <div class="meta-value">${workout.cycle || 'N/A'}</div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-label">Focus</div>
+                <div class="meta-value">${workout.cycleFocus || 'N/A'}</div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-label">Week ${workout.wk || '?'}</div>
+                <div class="meta-value">Day ${workout.day || '?'}</div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-label">Type</div>
+                <div class="meta-value">${workout.type || 'N/A'}</div>
+              </div>
+              ${cardioTypeInfo}
+            </div>
+
+            <div class="workout-description">
+              <strong>What to Do:</strong><br>
+              ${workout.whatToDo || 'No description available'}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('today-workout').innerHTML = workoutCards;
+    }
+
+    // ===== WORKOUT NAVIGATION =====
+    // Keep these for potential future use, but no longer displayed
+    function nextWorkout() {
+      currentWorkoutIndex = (currentWorkoutIndex + 1) % workouts.length;
+      displayTodayWorkout();
+    }
+
+    function prevWorkout() {
+      currentWorkoutIndex = (currentWorkoutIndex - 1 + workouts.length) % workouts.length;
+      displayTodayWorkout();
+    }
+
+    // ===== LOG MODAL =====
+    function openLogModalForWorkout(workoutIndex) {
+      currentWorkout = workouts[workoutIndex];
+      currentWorkoutIndex = workoutIndex;
+      
+      // Show/hide cardio type based on workout type
+      const cardioGroup = document.getElementById('cardio-type-group');
+      if (currentWorkout.type === 'Cardio') {
+        cardioGroup.style.display = 'block';
+        document.getElementById('log-cardio-type').required = true;
+      } else {
+        cardioGroup.style.display = 'none';
+        document.getElementById('log-cardio-type').required = false;
+      }
+
+      document.getElementById('log-modal').classList.add('active');
+    }
+
+    function closeLogModal() {
+      document.getElementById('log-modal').classList.remove('active');
+      document.getElementById('log-form').reset();
+      document.getElementById('log-date').valueAsDate = new Date();
+    }
+
+    // ===== AD HOC MODAL =====
+    function openAdHocModal() {
+      document.getElementById('adhoc-modal').classList.add('active');
+      document.getElementById('adhoc-date').valueAsDate = new Date();
+    }
+
+    function closeAdHocModal() {
+      document.getElementById('adhoc-modal').classList.remove('active');
+      document.getElementById('adhoc-form').reset();
+    }
+
+    // Handle cardio type visibility for ad hoc form
+    document.getElementById('adhoc-type').addEventListener('change', (e) => {
+      const cardioGroup = document.getElementById('adhoc-cardio-type-group');
+      if (e.target.value === 'Cardio') {
+        cardioGroup.style.display = 'block';
+      } else {
+        cardioGroup.style.display = 'none';
+        document.getElementById('adhoc-cardio-type').value = '';
+      }
+    });
+
+    // ===== SAVE WORKOUT =====
+    document.getElementById('log-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const logData = {
+        action: 'saveCompletion',
+        workoutId: currentWorkout.workoutId,
+        cycleFocus: currentWorkout.cycleFocus,
+        type: currentWorkout.type,
+        wod: currentWorkout.wod,
+        dateDone: document.getElementById('log-date').value,
+        whatWasDone: document.getElementById('log-notes').value,
+        cardioType: document.getElementById('log-cardio-type').value,
+        redLight: document.getElementById('log-redlight').checked,
+        hotTubSauna: document.getElementById('log-hottub').value,
+        coldPlunge: document.getElementById('log-coldplunge').checked
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(logData)
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to save workout');
+        }
+
+        alert('Workout logged successfully! 💪');
+        closeLogModal();
+        
+        // Refresh the workout list and analytics
+        loadWorkouts();
+        loadAnalytics();
+      } catch (error) {
+        alert('Error saving workout: ' + error.message);
+      }
+    });
+
+    // ===== SAVE AD HOC WORKOUT =====
+    document.getElementById('adhoc-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const logData = {
+        action: 'saveCompletion',
+        workoutId: 'adhoc-' + Date.now(), // Generate unique ID for ad hoc workouts
+        cycleFocus: document.getElementById('adhoc-focus').value || 'Ad Hoc',
+        type: document.getElementById('adhoc-type').value,
+        wod: document.getElementById('adhoc-wod').value,
+        dateDone: document.getElementById('adhoc-date').value,
+        whatWasDone: document.getElementById('adhoc-notes').value,
+        cardioType: document.getElementById('adhoc-cardio-type').value,
+        redLight: document.getElementById('adhoc-redlight').checked,
+        hotTubSauna: document.getElementById('adhoc-hottub').value,
+        coldPlunge: document.getElementById('adhoc-coldplunge').checked
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(logData)
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to save workout');
+        }
+
+        alert('Ad Hoc Workout logged successfully! 💪');
+        closeAdHocModal();
+        
+        // Refresh analytics
+        loadAnalytics();
+      } catch (error) {
+        alert('Error saving workout: ' + error.message);
+      }
+    });
+
+    // ===== LOAD HISTORY =====
+    async function loadHistory() {
+      document.getElementById('history-loading').style.display = 'block';
+      document.getElementById('history-error').style.display = 'none';
+      document.getElementById('history-list').innerHTML = '';
+
+      try {
+        const response = await fetch(`${API_URL}?action=getHistory`);
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to load history');
+        }
+
+        document.getElementById('history-loading').style.display = 'none';
+
+        const history = data.history || [];
+        
+        if (history.length === 0) {
+          document.getElementById('history-list').innerHTML = `
+            <div class="empty-state">
+              <p>No workout history yet. Start logging your workouts!</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Sort by date, most recent first
+        history.sort((a, b) => new Date(b.dateDone) - new Date(a.dateDone));
+
+        const historyHTML = history.map(item => {
+          const date = new Date(item.dateDone);
+          const dateStr = date.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+
+          return `
+            <div class="history-item">
+              <div class="history-date">${dateStr}</div>
+              <h3 style="color: #667eea; margin-bottom: 10px;">${item.wod}</h3>
+              <div style="margin-bottom: 10px;">
+                <strong>Type:</strong> ${item.type} | 
+                <strong>Focus:</strong> ${item.cycleFocus}
+                ${item.cardioType ? ` | <strong>Cardio:</strong> ${item.cardioType}` : ''}
+              </div>
+              <div style="background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                ${item.whatWasDone}
+              </div>
+              <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                ${item.redLight === 'Yes' ? '🔴 Red Light | ' : ''}
+                ${item.hotTubSauna !== 'No' ? `🔥 ${item.hotTubSauna} | ` : ''}
+                ${item.coldPlunge === 'Yes' ? '🧊 Cold Plunge' : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        document.getElementById('history-list').innerHTML = historyHTML;
+        
+        // Store history data for analytics
+        historyData = history;
+      } catch (error) {
+        document.getElementById('history-loading').style.display = 'none';
+        document.getElementById('history-error').textContent = error.message;
+        document.getElementById('history-error').style.display = 'block';
+      }
+    }
+
+    // ===== ANALYTICS =====
+    async function loadAnalytics() {
+      try {
+        const response = await fetch(`${API_URL}?action=getHistory`);
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to load analytics');
+        }
+
+        historyData = data.history || [];
+        calculateAnalytics(historyData);
+      } catch (error) {
+        console.error('Analytics error:', error);
+      }
+    }
+
+    function calculateAnalytics(history) {
+      if (history.length === 0) {
+        return;
+      }
+
+      // Total workouts
+      document.getElementById('total-workouts').textContent = history.length;
+
+      // This week's workouts
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      
+      const thisWeekCount = history.filter(item => {
+        const date = new Date(item.dateDone);
+        return date >= weekAgo;
+      }).length;
+
+      const lastWeekCount = history.filter(item => {
+        const date = new Date(item.dateDone);
+        return date >= twoWeeksAgo && date < weekAgo;
+      }).length;
+
+      document.getElementById('week-workouts').textContent = thisWeekCount;
+      
+      const weekChange = lastWeekCount > 0 ? 
+        `${thisWeekCount > lastWeekCount ? '↑' : '↓'} ${Math.abs(thisWeekCount - lastWeekCount)} from last week` :
+        'First week!';
+      document.getElementById('week-change').textContent = weekChange;
+
+      // Current streak
+      const streak = calculateStreak(history);
+      document.getElementById('current-streak').textContent = streak;
+
+      // Workout type distribution
+      const typeCounts = {};
+      history.forEach(item => {
+        const type = item.type || 'Other';
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+      });
+
+      const maxTypeCount = Math.max(...Object.values(typeCounts));
+      const typeChartHTML = Object.entries(typeCounts)
+        .sort((a, b) => b[1] - a[1])
+        .map(([type, count]) => `
+          <div class="bar-item">
+            <div class="bar-label">${type}</div>
+            <div class="bar-container">
+              <div class="bar-fill" style="width: ${(count / maxTypeCount) * 100}%">
+                ${count}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      document.getElementById('type-chart').innerHTML = typeChartHTML;
+
+      // Recovery usage
+      const recoveryStats = {
+        'Red Light': history.filter(item => item.redLight === 'Yes').length,
+        'Hot Tub': history.filter(item => item.hotTubSauna === 'Hot Tub').length,
+        'Sauna': history.filter(item => item.hotTubSauna === 'Sauna').length,
+        'Cold Plunge': history.filter(item => item.coldPlunge === 'Yes').length
+      };
+
+      const maxRecoveryCount = Math.max(...Object.values(recoveryStats));
+      const recoveryChartHTML = Object.entries(recoveryStats)
+        .filter(([_, count]) => count > 0)
+        .sort((a, b) => b[1] - a[1])
+        .map(([recovery, count]) => `
+          <div class="bar-item">
+            <div class="bar-label">${recovery}</div>
+            <div class="bar-container">
+              <div class="bar-fill" style="width: ${(count / maxRecoveryCount) * 100}%">
+                ${count}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      document.getElementById('recovery-chart').innerHTML = recoveryChartHTML || '<div style="color: #999;">No recovery data yet</div>';
+
+      // Weekly volume (last 4 weeks)
+      const weeklyVolume = [];
+      for (let i = 0; i < 4; i++) {
+        const weekStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
+        const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+        
+        const count = history.filter(item => {
+          const date = new Date(item.dateDone);
+          return date >= weekStart && date < weekEnd;
+        }).length;
+
+        weeklyVolume.unshift({ week: `Week ${4 - i}`, count });
+      }
+
+      const maxWeeklyCount = Math.max(...weeklyVolume.map(w => w.count));
+      const weeklyChartHTML = weeklyVolume.map(({ week, count }) => `
+        <div class="bar-item">
+          <div class="bar-label">${week}</div>
+          <div class="bar-container">
+            <div class="bar-fill" style="width: ${maxWeeklyCount > 0 ? (count / maxWeeklyCount) * 100 : 0}%">
+              ${count}
+            </div>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('weekly-chart').innerHTML = weeklyChartHTML;
+    }
+
+    function calculateStreak(history) {
+      if (history.length === 0) return 0;
+
+      // Sort by date, most recent first
+      const sorted = [...history].sort((a, b) => new Date(b.dateDone) - new Date(a.dateDone));
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      // Check if most recent workout was today or yesterday
+      const mostRecent = new Date(sorted[0].dateDone);
+      mostRecent.setHours(0, 0, 0, 0);
+
+      if (mostRecent < yesterday) {
+        return 0; // Streak broken
+      }
+
+      // Count consecutive days
+      let streak = 0;
+      let currentDate = new Date(mostRecent);
+      
+      for (const item of sorted) {
+        const workoutDate = new Date(item.dateDone);
+        workoutDate.setHours(0, 0, 0, 0);
+
+        if (workoutDate.getTime() === currentDate.getTime()) {
+          // Same day - don't increment streak yet
+          continue;
+        } else if (workoutDate.getTime() === currentDate.getTime() - 24 * 60 * 60 * 1000) {
+          // Previous day - increment streak
+          streak++;
+          currentDate.setDate(currentDate.getDate() - 1);
+        } else {
+          // Gap in streak
+          break;
+        }
+      }
+
+      return streak + 1; // Add 1 for the current day
+    }
+  </script>
+</body>
+</html>
