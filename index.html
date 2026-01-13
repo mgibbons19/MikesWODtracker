@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="/manifest.json">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WOD Tracker</title>
@@ -410,7 +411,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>💪 WOD Tracker</h1>
+    <h1>💪 Mike's WODs</h1>
 
     <div class="tabs">
       <button class="tab active" onclick="showTab('today')">Today's WOD</button>
@@ -497,8 +498,9 @@
           <label class="form-label">Cardio Type</label>
           <select id="log-cardio-type" class="form-select">
             <option value="">Select...</option>
-            <option value="Wheels">Wheels (Bike/Row)</option>
+            <option value="Wheels">Wheels (Bike)</option>
             <option value="Feet">Feet (Run)</option>
+            ,option value="Swim">Swim (Swim)</option>
           </select>
         </div>
 
@@ -550,6 +552,7 @@
             <option value="Strength">Strength</option>
             <option value="Cardio">Cardio</option>
             <option value="Mixed">Mixed</option>
+            <option value="MetCon">MetCon</option>
             <option value="Recovery">Recovery</option>
             <option value="Other">Other</option>
           </select>
@@ -569,8 +572,9 @@
           <label class="form-label">Cardio Type</label>
           <select id="adhoc-cardio-type" class="form-select">
             <option value="">Select...</option>
-            <option value="Wheels">Wheels (Bike/Row)</option>
+            <option value="Wheels">Wheels (Bike)</option>
             <option value="Feet">Feet (Run)</option>
+            <option value="Swim">Swim</option>
           </select>
         </div>
 
@@ -706,7 +710,8 @@
               ${workout.whatToDo || 'No description available'}
             </div>
             <button class="btn btn-primary" onclick="openLogModalForWorkout(${startIndex + index})">Log It!</button>
-          </div>
+          <button class="btn" style="background: #e53e3e; color: white;" onclick="skipWorkout(${startIndex + index})">Skip</button>
+        </div>
         `;
       }).join('');
       document.getElementById('today-workout').innerHTML = workoutList;
@@ -748,6 +753,45 @@
       document.getElementById('log-date').valueAsDate = new Date();
     }
 
+    // ===== SKIP WORKOUT =====
+    async function skipWorkout(workoutIndex) {
+      if (!confirm('Are you sure you want to skip this workout?')) {
+        return;
+      }
+
+      const workout = workouts[workoutIndex];
+      
+      const skipData = {
+        action: 'skipWorkout',
+        workoutId: workout.workoutId,
+        cycleFocus: workout.cycleFocus,
+        type: workout.type,
+        wod: workout.wod,
+        dateDone: new Date().toISOString().split('T')[0] // Today's date in YYYY-MM-DD format
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(skipData)
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to skip workout');
+        }
+
+        alert('Workout skipped');
+        
+        // Refresh the workout list and analytics
+        loadWorkouts();
+        loadAnalytics();
+      } catch (error) {
+        alert('Error skipping workout: ' + error.message);
+      }
+    }
+    
     // ===== AD HOC MODAL =====
     function openAdHocModal() {
       document.getElementById('adhoc-modal').classList.add('active');
