@@ -511,14 +511,7 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Heat</label>
-          <select id="log-heat" class="form-select">
-            <option value="No">No</option>
-            <option value="Hot Tub">Hot Tub</option>
-            <option value="Sauna">Sauna</option>
-          </select>
-        </div>
+       
 
         <div class="form-group">
           <div class="form-checkbox">
@@ -590,14 +583,7 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Heat</label>
-          <select id="adhoc-heat" class="form-select">
-            <option value="No">No</option>
-            <option value="Hot Tub">Hot Tub</option>
-            <option value="Sauna">Sauna</option>
-          </select>
-        </div>
+        
 
         <div class="form-group">
           <div class="form-checkbox">
@@ -828,7 +814,7 @@
         whatWasDone: document.getElementById('log-notes').value,
         cardioType: document.getElementById('log-cardio-type').value,
         redLight: document.getElementById('log-redlight').checked,
-        heat: document.getElementById('log-heat').value,
+ 
         coldPlunge: document.getElementById('log-coldplunge').checked
       };
 
@@ -869,7 +855,7 @@
         whatWasDone: document.getElementById('adhoc-notes').value,
         cardioType: document.getElementById('adhoc-cardio-type').value,
         redLight: document.getElementById('adhoc-redlight').checked,
-        heat: document.getElementById('adhoc-heat').value,
+        
         coldPlunge: document.getElementById('adhoc-coldplunge').checked
       };
 
@@ -948,7 +934,7 @@
               </div>
               <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
                 ${item.redLight === 'Yes' ? '🔴 Red Light | ' : ''}
-                ${item.heat !== 'No' ? `🔥 ${item.heat} | ` : ''}
+                
                 ${item.coldPlunge === 'Yes' ? '🧊 Cold Plunge' : ''}
               </div>
             </div>
@@ -1046,22 +1032,15 @@
       document.getElementById('type-chart').innerHTML = typeChartHTML;
 
       // Recovery usage
-      // Debug: See what the data actually looks like
+      
       console.log('Sample history items:', history.slice(0, 3));
-      console.log('Heat check:', history.map(item => ({
-        heat: item.heat,
-        hotTubSauna: item.hotTubSauna
-      })));
+      ;
 
-      const heatTotal = history.filter(item => {
-        const heat = item.heat ;
-        console.log('Checking heat:', heat); // Add this to see each value
-        return heat === 'Hot Tub' || heat === 'Sauna';
-      }).length;
+      
 
       const recoveryStats = {
         'Red Light': history.filter(item => item.redLight === 'Yes' || item.redLight === true).length,
-        'Heat': heatTotal,
+      
         'Cold Plunge': history.filter(item => item.coldPlunge === 'Yes' || item.coldPlunge === true).length
       };
 
